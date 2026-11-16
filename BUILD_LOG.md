@@ -2,6 +2,15 @@
 
 A day-by-day record of building an AI job hunt agent with n8n, OpenAI and SQL: what I did, what broke, and how I fixed it.
 
+## ⏱️ Time Tracking
+
+Time tracked task-by-task in a live tracker. Times are estimated from session timestamps.
+
+| Date | Time | Running total |
+|---|---|---|
+| Nov 11, 2026 | 1h 09m | 1h 09m |
+| Nov 16, 2026 | 52m | **2h 01m** |
+
 ---
 
 ## Day 1: Wednesday, Nov 11, 2026
