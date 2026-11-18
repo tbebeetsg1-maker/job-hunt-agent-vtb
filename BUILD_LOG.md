@@ -9,7 +9,8 @@ Time tracked task-by-task in a live tracker. Times are estimated from session ti
 | Date | Time | Running total |
 |---|---|---|
 | Nov 11, 2026 | 1h 09m | 1h 09m |
-| Nov 16, 2026 | 52m | **2h 01m** |
+| Nov 16, 2026 | 52m | 2h 01m |
+| Nov 18, 2026 | 1h 03m | **3h 04m** |
 
 ---
 
@@ -73,3 +74,32 @@ docker run -d --name n8n --restart unless-stopped -p 5678:5678 -e GENERIC_TIMEZO
 
 **Day 2 time:** about 52 minutes · **Running total:** about 2 hours
 
+---
+
+## Day 3: Wednesday, Nov 18, 2026
+
+### Database design (3:22 – 3:31 PM)
+- Picked **PostgreSQL** (free, runs in Docker next to n8n, built-in n8n node, in-demand skill).
+- Designed two tables:
+  - **`jobs`**: one row per posting, with a `job_key` fingerprint (company | title | location) so the same job sent by two boards is stored once. Links differ per site, so the URL can't be the key.
+  - **`target_roles`**: the titles the AI scores against, with a Primary/Safety lane and an on/off switch, so I can change targets with one line of SQL instead of editing the workflow. Seeded 11 titles.
+
+### PostgreSQL in Docker + n8n connection (3:31 – 3:59 PM)
+- Started PostgreSQL 17 as its own container (`jobhunt-db`, port 5432, persistent volume).
+- 🐛 **Problem:** `docker run` failed with *"failed to connect to the docker API"*. Cause: Docker Desktop wasn't running after a reboot. ✅ **Fix:** started Docker Desktop, waited for *Engine running*, re-ran. (JHA-30)
+- 🐛 **Problem:** locked out of n8n (owner password lost). ✅ **Fix:** `docker exec -u node -it n8n n8n user-management:reset` + `docker restart n8n`, then recreated the owner account. Saved credentials (OpenAI key) survived because they live in the Docker volume. (JHA-31)
+- Created the n8n **Postgres** credential. Host is `host.docker.internal`, not `localhost`: inside the n8n container, *localhost* means the container itself.
+- 🤖 Claude built and ran a **DB Setup** workflow in n8n that creates both tables, CHECK rules, indexes, and a **trigger** that auto-stamps `status_updated_at` when a job's status changes. Verified: `target_roles` = 11 rows, `jobs` = 0.
+- Script saved to GitHub: [`sql/01_create_tables.sql`](sql/01_create_tables.sql).
+
+### Schema changes after reviewing my manual tracker (3:59 – 4:10 PM)
+- Compared the design to the job tracker I keep with ChatGPT. Decided to keep the two **separate** and compare them later in Power BI (manual vs. automated tracking).
+- **Migration 02:** `source` limited to LinkedIn, Dice, Indeed, Monster.
+- **Migration 03:** full status pipeline (New, Skip, Applied, Recruiter Contact, Interview, Offer, Rejected, No Response) and a **generated `fit_label` column** (Strong Fit 75+, Potential Fit 50–74, Not a Fit under 50) so the agent speaks the same language as my tracker. Fit stays separate from outcome, so a rejection doesn't erase that a job was a good match.
+
+### Design decisions (4:10 – 4:25 PM)
+- **One daily report email** (instead of dozens of alert emails): today's numbers, top matches with apply links, a safety-lane section, and my pipeline.
+- **Alert emails go to Trash after processing**, but only *after* their jobs are saved, so a failed run never loses a job.
+- **The agent never applies for me.** It sorts and scores; I review and apply (human in the loop).
+
+**Day 3 time:** about 1 hour 3 minutes · **Running total:** about 3 hours 4 minutes
