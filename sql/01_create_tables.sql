@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS target_roles (
 CREATE TABLE IF NOT EXISTS jobs (
   job_id             SERIAL PRIMARY KEY,
   job_key            TEXT         NOT NULL UNIQUE,
-  source             VARCHAR(20)  NOT NULL CHECK (source IN ('Indeed','LinkedIn','Dice','Monster','Jobright','Other')),
+  source             VARCHAR(20)  NOT NULL CHECK (source IN ('LinkedIn','Dice','Indeed','Monster')),
   title              TEXT         NOT NULL,
   company            TEXT,
   location           TEXT,
