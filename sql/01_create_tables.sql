@@ -31,10 +31,16 @@ CREATE TABLE IF NOT EXISTS jobs (
   job_url            TEXT,
   match_score        SMALLINT     CHECK (match_score BETWEEN 0 AND 100),
   match_reason       TEXT,
-  status             VARCHAR(10)  NOT NULL DEFAULT 'New' CHECK (status IN ('New','Applied','Skip')),
+  status             VARCHAR(20)  NOT NULL DEFAULT 'New' CHECK (status IN ('New','Skip','Applied','Recruiter Contact','Interview','Offer','Rejected','No Response')),
   email_received_at  TIMESTAMPTZ,
   found_at           TIMESTAMPTZ  NOT NULL DEFAULT now(),
-  status_updated_at  TIMESTAMPTZ
+  status_updated_at  TIMESTAMPTZ,
+  -- Same Fit labels as my manual tracker, generated from the AI score
+  fit_label          VARCHAR(15)  GENERATED ALWAYS AS (
+                       CASE WHEN match_score >= 75 THEN 'Strong Fit'
+                            WHEN match_score >= 50 THEN 'Potential Fit'
+                            WHEN match_score IS NOT NULL THEN 'Not a Fit'
+                       END) STORED
 );
 
 -- Fast "top new matches" queries
