@@ -10,7 +10,8 @@ Time tracked task-by-task in a live tracker. Times are estimated from session ti
 |---|---|---|
 | Nov 11, 2026 | 1h 09m | 1h 09m |
 | Nov 16, 2026 | 52m | 2h 01m |
-| Nov 18, 2026 | 1h 03m | **3h 04m** |
+| Nov 18, 2026 | 1h 03m | 3h 04m |
+| Nov 19, 2026 | 49m | **3h 53m** |
 
 ---
 
@@ -103,3 +104,23 @@ docker run -d --name n8n --restart unless-stopped -p 5678:5678 -e GENERIC_TIMEZO
 - **The agent never applies for me.** It sorts and scores; I review and apply (human in the loop).
 
 **Day 3 time:** about 1 hour 3 minutes · **Running total:** about 3 hours 4 minutes
+---
+
+## Day 4: Thursday, Nov 19, 2026
+
+### Job alert sources (3:40 – 4:02 PM)
+- **LinkedIn:** alert already matched my target titles (AI Automation Engineer, Automation Engineer, AI Engineer, Data Analyst), daily by email. Kept "Top job picks" on; the AI score will filter weak picks.
+- **Indeed:** I had job *preferences* but no saved-search *alerts*. Created 8 daily alerts (4 titles × Remote + local).
+- Found that every job site sends alerts to the same Gmail inbox, so the agent only needs **one** Gmail connection.
+- Decision: the first run will also process saved alerts from the **last 7 days** (real test data on day one).
+
+### Gmail connection via Google Cloud OAuth 2.0 (4:02 – 4:29 PM)
+- Self-hosted n8n needs its own Google app to read Gmail, so I set it up in **Google Cloud**:
+  1. Created a project (`Job Hunt Agent`) and enabled the **Gmail API**
+  2. Configured the **OAuth consent screen** (External, Testing mode, my inbox as the only test user, so no Google app review is needed)
+  3. Created an **OAuth Web client** with n8n's redirect URI (`http://localhost:5678/rest/oauth2-credential/callback`)
+  4. Added a **Gmail OAuth2** credential in n8n and signed in: *Account connected* ✅
+- Skipped the Google Cloud \$300 free trial (not needed; the Gmail API is free).
+- All three connections are now in place: **Gmail** (email in), **OpenAI** (AI brain), **PostgreSQL** (memory).
+
+**Day 4 time:** about 49 minutes · **Running total:** about 3 hours 53 minutes
