@@ -11,7 +11,8 @@ Time tracked task-by-task in a live tracker. Times are estimated from session ti
 | Nov 11, 2026 | 1h 09m | 1h 09m |
 | Nov 16, 2026 | 52m | 2h 01m |
 | Nov 18, 2026 | 1h 03m | 3h 04m |
-| Nov 19, 2026 | 49m | **3h 53m** |
+| Nov 19, 2026 | 49m | 3h 53m |
+| Nov 23, 2026 | 2h 06m | **5h 59m** |
 
 ---
 
@@ -124,3 +125,25 @@ docker run -d --name n8n --restart unless-stopped -p 5678:5678 -e GENERIC_TIMEZO
 - All three connections are now in place: **Gmail** (email in), **OpenAI** (AI brain), **PostgreSQL** (memory).
 
 **Day 4 time:** about 49 minutes · **Running total:** about 3 hours 53 minutes
+
+---
+
+## Day 5: Monday, Nov 23, 2026
+
+### Security: private Docker network (10:07 – 10:21 AM)
+- Created a private Docker network (`jobhunt-net`) and recreated the database and n8n containers on it.
+- Both are now bound to **127.0.0.1 only**, so nothing outside this computer can reach them. Data and credentials stayed safe in their Docker volumes.
+
+### Gmail step: reading the job alerts (10:21 – 11:00 AM)
+- Built the **Job Hunt Agent** workflow: manual trigger → **Get job alert emails** (Gmail).
+- First search also caught LinkedIn invitations and Dice "profile viewed" emails, so I locked it to the 4 alert senders (plus subject "job alert" for Dice/Monster) and excluded the "is now active" confirmations.
+- Added a Code node, **Slim emails for AI**, that cleans tracking links down to the real job link and cuts the email text from about 310K to 94K characters (cheaper and faster AI calls).
+
+### AI step: pulling out job details (11:10 AM – 12:23 PM)
+- **Model:** OpenAI `gpt-6-luna` (GPT-4 models are being retired, and Luna is cheaper than the mini models) with a **strict JSON schema**, so every answer has the same shape.
+- **Problem:** the AI sometimes invented links (`jk=missing`) or miscopied long ones.
+- **Fix ("trust but verify"):** the Code node now swaps every link for a label like `[LINK 3]`. The AI only returns the **link number**, and a new **Resolve links + verify** Code node looks up the exact URL and drops any job whose number doesn't match a real link.
+- **Test run:** 32 of 32 emails recognized as job alerts, **308 jobs** extracted, every link number valid, **167 unique jobs** (the rest are the same job in more than one alert; the database will skip those).
+- **Plan change:** the Power Automate Desktop weekly Excel export is now part of the core build, not extra credit.
+
+**Day 5 time:** about 2 hours 6 minutes · **Running total:** about 5 hours 59 minutes
